@@ -25,7 +25,7 @@ public class Util
 		Map<String, String> query_pairs = new LinkedHashMap<String, String>();
 		String query = url.getQuery();
 
-		if (query != null && query.contains("&"))
+		if (query != null && (url.toString().contains("&") || url.toString().contains("?")))
 		{
 			String[] pairs = query.split("&");
 
