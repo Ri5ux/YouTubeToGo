@@ -1,1 +1,5 @@
 /bin/
+/content/
+/lib/
+*.log
+.classpath

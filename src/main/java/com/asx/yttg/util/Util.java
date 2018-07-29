@@ -1,16 +1,22 @@
-package com.asx.yttg;
+package com.asx.yttg.util;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import com.asx.yttg.YouTubeToGo;
 
 public class Util
 {
@@ -63,6 +69,7 @@ public class Util
 
 			if (connection.getResponseCode() / 100 != 2)
 			{
+				System.out.println("ERROR1");
 				return null;
 			} else
 			{
@@ -85,13 +92,14 @@ public class Util
 		{
 			if (!quiet)
 			{
-				Main.log().warning(e.toString() + ": " + url);
+				YouTubeToGo.log().warning(e.toString() + ": " + url);
 			}
 
 			if (connection != null)
 			{
 				connection.disconnect();
 			}
+			System.out.println("ERROR2");
 			return null;
 		} finally
 		{
@@ -112,18 +120,122 @@ public class Util
 	 */
 	public static void downloadFile(String fileUrl, String saveLocation) throws IOException
 	{
-		Main.log().info("Downloading file from '" + fileUrl + "' and saving it to '" + saveLocation + "'");
-		InputStream is = (new URL(fileUrl)).openStream();
-		FileOutputStream os = new FileOutputStream(saveLocation);
-		byte[] b = new byte[2048];
-		int length;
+		YouTubeToGo.log().info("Downloading file from '" + fileUrl + "' and saving it to '" + saveLocation + "'");
+//		InputStream is = (new URL(fileUrl)).openStream();
+//		FileOutputStream os = new FileOutputStream(saveLocation);
+//		byte[] b = new byte[4096 * 1024];
+//		int length;
+//
+//		while ((length = is.read(b)) != -1)
+//		{
+//			os.write(b, 0, length);
+//		}
+//
+//		is.close();
+//		os.close();
 
-		while ((length = is.read(b)) != -1)
+		/////////////////////////////////////////////////////
+
+		URL url = new URL(fileUrl);
+		URLConnection connection = url.openConnection();
+		int filesize = connection.getContentLength();
+		float dataRead = 0;
+		BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
+		FileOutputStream fos = new FileOutputStream(saveLocation);
+		BufferedOutputStream bout = new BufferedOutputStream(fos, 2048);
+		byte[] data = new byte[2048];
+		int i = 0;
+		int c = 0;
+
+		System.out.println(String.format("File Size: %s MB", Math.round(((double) filesize / 1024D / 1024D) * 100D) / 100D));
+
+		while ((i = in.read(data, 0, 2048)) >= 0)
 		{
-			os.write(b, 0, length);
+			c++;
+			dataRead = dataRead + i;
+			bout.write(data, 0, i);
+			float progress = (dataRead * 100) / filesize;
+
+			if (c % 100 == 0)
+			{
+				commandLineProgressBar((int) progress);
+			}
+		}
+		
+		System.out.println("");
+
+		bout.close();
+		in.close();
+	}
+
+	public static void commandLineProgressBar(int progress)
+	{
+		int size = 50;
+		int relativeProgress = progress * size / 100;
+
+		System.out.print("\r[");
+
+		for (int i = 0; i < size; i++)
+		{
+			if (i < relativeProgress)
+			{
+				System.out.print("=");
+			} else
+			{
+				System.out.print(" ");
+			}
 		}
 
-		is.close();
-		os.close();
+		System.out.print("] " + progress + "%");
+	}
+
+	public static String cleanupResult(String result)
+	{
+		if (result != null && !result.isEmpty())
+		{
+			result = result.replaceAll("[\\s\\p{Z}]+", " ").trim();
+			return result.replace("\n", "").replace("\r", "");
+		}
+
+		System.out.println("Unable to cleanup.");
+
+		return null;
+	}
+
+	public static boolean isFileEmpty(File audioFile)
+	{
+		BufferedReader br = null;
+
+		try
+		{
+			br = new BufferedReader(new FileReader(audioFile.getAbsolutePath()));
+
+			if (br.readLine() == null)
+			{
+				return true;
+			}
+		} catch (IOException e)
+		{
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+				if (br != null)
+				{
+					br.close();
+				}
+			} catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+
+		return false;
+	}
+
+	public static String cleanupFilename(String filename)
+	{
+		return filename.replaceAll("[\\\\/:*?\"<>|]", "");
 	}
 }
