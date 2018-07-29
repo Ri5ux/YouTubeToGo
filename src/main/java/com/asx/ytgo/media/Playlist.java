@@ -85,7 +85,7 @@ public class Playlist
 
 		for (Video v : this.videos)
 		{
-			System.out.println(String.format("Processing %s - %s/%s", v.getId(), this.videos.indexOf(v), this.videos.size()));
+			System.out.println(String.format("Processing %s - %s/%s", v.getId(), this.videos.indexOf(v) + 1, this.videos.size()));
 			
 			if (v.getTitle() == null || v.getTitle().isEmpty())
 			{
