@@ -1,11 +1,11 @@
-package com.asx.yttg.util.streams;
+package com.asx.ytgo.util.streams;
 
 import java.io.File;
 import java.io.IOException;
 
-import com.asx.yttg.YouTubeToGo;
-import com.asx.yttg.media.Video;
-import com.asx.yttg.util.Util;
+import com.asx.ytgo.YouTubeGo;
+import com.asx.ytgo.media.Video;
+import com.asx.ytgo.util.Util;
 import com.google.gson.JsonObject;
 
 public class AudioStream extends Stream
@@ -14,7 +14,7 @@ public class AudioStream extends Stream
 	{
 		super(v, o);
 
-		if (YouTubeToGo.DEBUG)
+		if (YouTubeGo.DEBUG)
 		{
 			System.out.println("");
 		}
@@ -55,6 +55,6 @@ public class AudioStream extends Stream
 	@Override
 	public File getProposedFile()
 	{
-		return new File(YouTubeToGo.getAudioDirectory().getAbsolutePath(), String.format("%s.%s", Util.cleanupFilename(this.getVideo().getTitle()), this.getFileExtension()));
+		return new File(YouTubeGo.getAudioDirectory().getAbsolutePath(), String.format("%s.%s", Util.cleanupFilename(this.getVideo().getTitle()), this.getFileExtension()));
 	}
 }

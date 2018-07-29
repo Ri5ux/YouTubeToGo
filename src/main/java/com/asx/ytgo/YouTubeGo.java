@@ -1,25 +1,39 @@
-package com.asx.yttg;
+package com.asx.ytgo;
 
 import java.io.File;
 import java.net.URL;
 import java.util.Map;
 import java.util.logging.Logger;
 
-import com.asx.yttg.media.Playlist;
-import com.asx.yttg.media.Video;
-import com.asx.yttg.util.Util;
-import com.asx.yttg.util.streams.AudioStream;
+import com.asx.ytgo.media.Playlist;
+import com.asx.ytgo.media.Video;
+import com.asx.ytgo.util.Util;
+import com.asx.ytgo.util.streams.AudioStream;
 
-public class YouTubeToGo
+public class YouTubeGo
 {
 	public static final boolean DEBUG = false;
+	private static final File LWJGL_NATIVES = new File("lib/natives");
+	public static final File RESOURCES = new File("resources");
 
-	private static Logger logger = Logger.getLogger("YTTG");
+	private static Logger logger = Logger.getLogger("YTGO");
 	private static File workDirectory = new File("content");
-	private static File audioDirectory = new File(YouTubeToGo.getWorkDirectory(), "audio");
+	private static File audioDirectory = new File(YouTubeGo.getWorkDirectory(), "audio");
+	
+	private static UserInterface ui;
+	private static boolean appRunning = true;
+	
+	public static class Properties
+	{
+		public static final String NAME = "YouTube Go!";
+		public static final String VERSION = "1.0";
+	}
 
 	public static void main(String[] args) throws Exception
 	{
+		System.out.println("LWJGL Natives Path: " + LWJGL_NATIVES.getAbsolutePath());
+		System.setProperty("org.lwjgl.librarypath", LWJGL_NATIVES.getAbsolutePath());
+		
 		if (!getWorkDirectory().exists())
 		{
 			if (getWorkDirectory().mkdirs())
@@ -36,15 +50,29 @@ public class YouTubeToGo
 			}
 		}
 
-		URL url = new URL(args[0]);
-		Map<String, String> queryMap = Util.splitQuery(url);
+		System.out.println(Properties.NAME);
+		System.out.println("Version " + Properties.VERSION);
+		
+		appRunning = true;
+		ui = new UserInterface();
+		ui.init();
 
-		System.out.println("YouTube To Go");
-		System.out.println("Version 1.0");
-		System.out.println("URL To Process: " + url);
-		System.out.println("URL Parameters: " + queryMap);
 
-		downloadPlaylist(queryMap);
+//		URL url = new URL(args[0]);
+//		Map<String, String> queryMap = Util.splitQuery(url);
+//		System.out.println("URL To Process: " + url);
+//		System.out.println("URL Parameters: " + queryMap);
+//		downloadPlaylist(queryMap);
+	}
+	
+	protected static void run()
+	{
+//		System.out.println("run client");
+	}
+	
+	public static void shutdown()
+	{
+		YouTubeGo.appRunning = false;
 	}
 
 	public static void downloadPlaylist(Map<String, String> queryMap)
@@ -87,5 +115,15 @@ public class YouTubeToGo
 	public static File getAudioDirectory()
 	{
 		return audioDirectory;
+	}
+	
+	public static UserInterface gui()
+	{
+		return ui;
+	}
+	
+	public static boolean isAppRunning()
+	{
+		return appRunning;
 	}
 }

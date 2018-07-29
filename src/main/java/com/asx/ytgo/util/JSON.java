@@ -1,11 +1,11 @@
-package com.asx.yttg.util;
+package com.asx.ytgo.util;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import com.asx.yttg.YouTubeToGo;
+import com.asx.ytgo.YouTubeGo;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
@@ -40,7 +40,7 @@ public class JSON
 			}
 		} catch (Exception e)
 		{
-			YouTubeToGo.log().info("The stream could not be parsed as valid JSON.");
+			YouTubeGo.log().info("The stream could not be parsed as valid JSON.");
 			e.printStackTrace();
 		}
 		
@@ -63,7 +63,7 @@ public class JSON
 			}
 		} catch (Exception e)
 		{
-			YouTubeToGo.log().info("The stream could not be parsed as valid JSON.");
+			YouTubeGo.log().info("The stream could not be parsed as valid JSON.");
 			e.printStackTrace();
 		}
 		

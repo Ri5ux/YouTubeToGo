@@ -1,12 +1,12 @@
-package com.asx.yttg.media;
+package com.asx.ytgo.media;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import com.asx.yttg.util.JSON;
-import com.asx.yttg.util.Util;
-import com.asx.yttg.util.streams.AudioStream;
+import com.asx.ytgo.util.JSON;
+import com.asx.ytgo.util.Util;
+import com.asx.ytgo.util.streams.AudioStream;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -14,6 +14,7 @@ public class Playlist
 {
 	private ArrayList<Video> videos = new ArrayList<Video>();
 	private String playlistId;
+	private JsonElement json;
 
 	public Playlist(String playlistId)
 	{
@@ -28,8 +29,8 @@ public class Playlist
 
 		if (result != null)
 		{
-			JsonElement json = JSON.parseJsonFromString(String.format("[%s]", result));
-
+			this.json = JSON.parseJsonFromString(String.format("[%s]", result));
+			
 			if (json != null)
 			{
 				for (JsonElement e : json.getAsJsonArray())
@@ -40,8 +41,16 @@ public class Playlist
 						JsonObject snippet = streamJson.get("snippet").getAsJsonObject();
 						JsonObject resourceId = snippet.get("resourceId").getAsJsonObject();
 						String videoId = resourceId.get("videoId").getAsString();
+						String title = snippet.get("title").getAsString();
 
 						Video v = new Video(videoId);
+						v.setTitle(title);
+						
+						if (v.verifyApplicableMediaFiles())
+						{
+							v.setDownloaded();
+						}
+						
 						this.videos.add(v);
 					}
 				}
@@ -77,7 +86,11 @@ public class Playlist
 		for (Video v : this.videos)
 		{
 			System.out.println(String.format("Processing %s - %s/%s", v.getId(), this.videos.indexOf(v), this.videos.size()));
-			v.process();
+			
+			if (v.getTitle() == null || v.getTitle().isEmpty())
+			{
+				v.process();
+			}
 
 			if (download)
 			{
@@ -86,6 +99,7 @@ public class Playlist
 				if (applicableFiles != null && applicableFiles.length > 0 && v.verifyApplicableMediaFiles())
 				{
 					System.out.println("Found applicable media files, skipping download: " + Arrays.asList(applicableFiles));
+					v.setDownloaded();
 				} else
 				{
 					this.doVideoDownload(v);
@@ -123,6 +137,7 @@ public class Playlist
 			if (audio.download())
 			{
 				System.out.println("Downloaded successfully!");
+				v.setDownloaded();
 				break;
 			}
 
@@ -152,5 +167,10 @@ public class Playlist
 	public ArrayList<Video> videos()
 	{
 		return this.videos;
+	}
+	
+	public JsonElement getJson()
+	{
+		return json;
 	}
 }

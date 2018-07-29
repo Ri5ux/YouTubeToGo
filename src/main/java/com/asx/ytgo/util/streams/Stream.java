@@ -1,10 +1,10 @@
-package com.asx.yttg.util.streams;
+package com.asx.ytgo.util.streams;
 
 import java.io.File;
 
-import com.asx.yttg.YouTubeToGo;
-import com.asx.yttg.media.Video;
-import com.asx.yttg.util.Util;
+import com.asx.ytgo.YouTubeGo;
+import com.asx.ytgo.media.Video;
+import com.asx.ytgo.util.Util;
 import com.google.gson.JsonObject;
 
 public class Stream
@@ -21,7 +21,7 @@ public class Stream
 		this.bitrate = o.get("bitrate").getAsLong();
 		this.type = o.get("type").getAsString();
 
-		if (YouTubeToGo.DEBUG)
+		if (YouTubeGo.DEBUG)
 		{
 			System.out.println(String.format("URL: %s", this.url));
 			System.out.println(String.format("Bitrate: %s", this.bitrate));
@@ -57,7 +57,7 @@ public class Stream
 
 	public File getProposedFile()
 	{
-		return new File(YouTubeToGo.getAudioDirectory().getAbsolutePath(), String.format("%s.%s", this.getVideo().getFileSafeName(), this.getFileExtension()));
+		return new File(YouTubeGo.getAudioDirectory().getAbsolutePath(), String.format("%s.%s", this.getVideo().getFileSafeName(), this.getFileExtension()));
 	}
 
 	public Video getVideo()

@@ -1,4 +1,4 @@
-package com.asx.yttg.util;
+package com.asx.ytgo.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -16,7 +16,7 @@ import java.net.URLDecoder;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.asx.yttg.YouTubeToGo;
+import com.asx.ytgo.YouTubeGo;
 
 public class Util
 {
@@ -24,12 +24,16 @@ public class Util
 	{
 		Map<String, String> query_pairs = new LinkedHashMap<String, String>();
 		String query = url.getQuery();
-		String[] pairs = query.split("&");
 
-		for (String pair : pairs)
+		if (query != null && query.contains("&"))
 		{
-			int idx = pair.indexOf("=");
-			query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+			String[] pairs = query.split("&");
+
+			for (String pair : pairs)
+			{
+				int idx = pair.indexOf("=");
+				query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+			}
 		}
 
 		return query_pairs;
@@ -92,7 +96,7 @@ public class Util
 		{
 			if (!quiet)
 			{
-				YouTubeToGo.log().warning(e.toString() + ": " + url);
+				YouTubeGo.log().warning(e.toString() + ": " + url);
 			}
 
 			if (connection != null)
@@ -120,7 +124,7 @@ public class Util
 	 */
 	public static void downloadFile(String fileUrl, String saveLocation) throws IOException
 	{
-		YouTubeToGo.log().info("Downloading file from '" + fileUrl + "' and saving it to '" + saveLocation + "'");
+		YouTubeGo.log().info("Downloading file from '" + fileUrl + "' and saving it to '" + saveLocation + "'");
 //		InputStream is = (new URL(fileUrl)).openStream();
 //		FileOutputStream os = new FileOutputStream(saveLocation);
 //		byte[] b = new byte[4096 * 1024];
@@ -161,7 +165,7 @@ public class Util
 				commandLineProgressBar((int) progress);
 			}
 		}
-		
+
 		System.out.println("");
 
 		bout.close();

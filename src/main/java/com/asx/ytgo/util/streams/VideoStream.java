@@ -1,7 +1,7 @@
-package com.asx.yttg.util.streams;
+package com.asx.ytgo.util.streams;
 
-import com.asx.yttg.YouTubeToGo;
-import com.asx.yttg.media.Video;
+import com.asx.ytgo.YouTubeGo;
+import com.asx.ytgo.media.Video;
 import com.google.gson.JsonObject;
 
 public class VideoStream extends Stream
@@ -18,7 +18,7 @@ public class VideoStream extends Stream
 		this.quality = o.get("quality_label").getAsString();
 		this.resolution = o.get("size").getAsString();
 
-		if (YouTubeToGo.DEBUG)
+		if (YouTubeGo.DEBUG)
 		{
 			System.out.println(String.format("Framerate: %s", this.framerate));
 			System.out.println(String.format("Quality: %s", this.quality));
