@@ -5,3 +5,4 @@ javac -cp YouTubeGo.jar;lib/* -d bin/ @sources.txt
 del sources.txt
 cd bin
 jar -cvf ..\YouTubeGo.jar com
+cd..
