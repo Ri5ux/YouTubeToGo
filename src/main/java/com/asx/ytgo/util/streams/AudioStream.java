@@ -25,13 +25,11 @@ public class AudioStream extends Stream
 	{
 		try
 		{
-			File audio = this.getProposedFile();
-
 			if (this.checkFile())
 			{
-				System.out.println(String.format("Save filename: %s", audio.getAbsolutePath()));
-				audio.createNewFile();
-				Util.downloadFile(this.getUrl(), audio.toString());
+				System.out.println(String.format("Save filename: %s", this.getFile().getAbsolutePath()));
+				this.getFile().createNewFile();
+				Util.downloadFile(this.getUrl(), this.getFile().toString());
 			} else
 			{
 				System.out.println("Media file already exists, skipping!");
@@ -45,7 +43,7 @@ public class AudioStream extends Stream
 
 		return true;
 	}
-
+	
 	@Override
 	public String getFileExtension()
 	{
@@ -53,8 +51,13 @@ public class AudioStream extends Stream
 	}
 
 	@Override
-	public File getProposedFile()
+	public File getFile()
 	{
-		return new File(YouTubeGo.getAudioDirectory().getAbsolutePath(), String.format("%s.%s", Util.cleanupFilename(this.getVideo().getTitle()), this.getFileExtension()));
+		if (!YouTubeGo.getAudioDirectory().exists())
+		{
+			YouTubeGo.getAudioDirectory().mkdirs();
+		}
+		
+		return new File(YouTubeGo.getAudioDirectory().getAbsolutePath(), String.format("%s.%s", this.v.getFileSafeName(), this.getFileExtension()));
 	}
 }

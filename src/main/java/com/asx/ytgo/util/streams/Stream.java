@@ -31,7 +31,7 @@ public class Stream
 
 	public boolean checkFile()
 	{
-		return checkFile(this.getProposedFile());
+		return checkFile(this.getFile());
 	}
 
 	public static boolean checkFile(File mediaFile)
@@ -53,11 +53,6 @@ public class Stream
 	public boolean download()
 	{
 		return false;
-	}
-
-	public File getProposedFile()
-	{
-		return new File(YouTubeGo.getAudioDirectory().getAbsolutePath(), String.format("%s.%s", this.getVideo().getFileSafeName(), this.getFileExtension()));
 	}
 
 	public Video getVideo()
@@ -83,5 +78,10 @@ public class Stream
 	public String getFileExtension()
 	{
 		return this.getType().split("/")[1];
+	}
+
+	public File getFile()
+	{
+		return null;
 	}
 }

@@ -67,7 +67,7 @@ public class YouTubeGo
 	
 	protected static void run()
 	{
-//		System.out.println("run client");
+		;
 	}
 	
 	public static void shutdown()
@@ -79,7 +79,7 @@ public class YouTubeGo
 	{
 		String playlistId = queryMap.get("list");
 		Playlist p = new Playlist(playlistId);
-		p.prepare();
+		p.downloadPlaylistData();
 		p.process(true);
 
 		System.out.println(String.format("Downloaded %s video(s) in playlist %s", p.videos().size(), p.getPlaylistId()));

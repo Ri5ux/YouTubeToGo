@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
@@ -113,6 +114,69 @@ public class Util
 			}
 		}
 	}
+	
+	public static boolean fileSizeMatches(File localFile, URL remoteFile)
+	{
+		long remoteFileSize = getRemoteFilesize(remoteFile);
+		long localFileSize = localFile.length();
+		
+		if (remoteFileSize == localFileSize)
+		{
+			return true;
+		}
+		
+		return false;
+	}
+
+	public static long getRemoteFilesize(String fileUrl)
+	{
+		try
+		{
+			return getRemoteFilesize(new URL(fileUrl));
+		} catch (MalformedURLException e)
+		{
+			e.printStackTrace();
+		}
+
+		return 0;
+	}
+	
+	public static int getRemoteCode(URL url)
+	{
+		if (url != null)
+		{
+			try
+			{
+				HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+				connection.setRequestMethod("GET");
+				connection.connect();
+				
+				return connection.getResponseCode();
+			} catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+		
+		return 0;
+	}
+
+	public static long getRemoteFilesize(URL url)
+	{
+		if (url != null)
+		{
+			try
+			{
+				URLConnection connection = url.openConnection();
+				return connection.getContentLength();
+			} catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+
+		return 0;
+	}
 
 	/**
 	 * Downloads a file from the specified URL and saves it to the specified
@@ -125,20 +189,6 @@ public class Util
 	public static void downloadFile(String fileUrl, String saveLocation) throws IOException
 	{
 		YouTubeGo.log().info("Downloading file from '" + fileUrl + "' and saving it to '" + saveLocation + "'");
-//		InputStream is = (new URL(fileUrl)).openStream();
-//		FileOutputStream os = new FileOutputStream(saveLocation);
-//		byte[] b = new byte[4096 * 1024];
-//		int length;
-//
-//		while ((length = is.read(b)) != -1)
-//		{
-//			os.write(b, 0, length);
-//		}
-//
-//		is.close();
-//		os.close();
-
-		/////////////////////////////////////////////////////
 
 		URL url = new URL(fileUrl);
 		URLConnection connection = url.openConnection();
@@ -151,6 +201,7 @@ public class Util
 		int i = 0;
 		int c = 0;
 
+		if (YouTubeGo.DEBUG)
 		System.out.println(String.format("File Size: %s MB", Math.round(((double) filesize / 1024D / 1024D) * 100D) / 100D));
 
 		while ((i = in.read(data, 0, 2048)) >= 0)
@@ -160,9 +211,12 @@ public class Util
 			bout.write(data, 0, i);
 			float progress = (dataRead * 100) / filesize;
 
-			if (c % 100 == 0)
+			if (YouTubeGo.DEBUG)
 			{
-				commandLineProgressBar((int) progress);
+				if (c % 100 == 0)
+				{
+					commandLineProgressBar((int) progress);
+				}
 			}
 		}
 

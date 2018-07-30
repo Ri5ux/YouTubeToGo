@@ -2,6 +2,8 @@ package com.asx.ytgo.media;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 
 import com.asx.ytgo.YouTubeGo;
@@ -16,13 +18,18 @@ import com.google.gson.JsonObject;
 public class Video
 {
 	private String id;
-	private boolean downloaded;
 	private String title;
 	private String videoLength;
 	private JsonObject videoArguments;
+	private float percentDownloaded;
+	private String statusText;
+	
+	private boolean preparationThreadComplete;
+	private boolean hasErrored;
 
 	private ArrayList<VideoStream> videoStreams;
 	private ArrayList<AudioStream> audioStreams;
+	private AudioStream audioStream = null;
 
 	public Video(String id)
 	{
@@ -38,19 +45,24 @@ public class Video
 
 	public boolean isDownloaded()
 	{
-		return downloaded;
+		return percentDownloaded >= 100;
 	}
-	
+
 	public void setDownloaded()
 	{
-		this.downloaded = true;
+		this.percentDownloaded = 100;
+	}
+
+	public void setPercentDownloaded(float percentDownloaded)
+	{
+		this.percentDownloaded = percentDownloaded;
 	}
 
 	public String getTitle()
 	{
 		return title;
 	}
-	
+
 	public void setTitle(String title)
 	{
 		this.title = title;
@@ -79,6 +91,11 @@ public class Video
 		
 		File[] applicable = getApplicableMediaFiles();
 
+		if (applicable == null)
+		{
+			return false;
+		}
+			
 		for (File f : applicable)
 		{
 			if (Stream.checkFile(f))
@@ -159,6 +176,11 @@ public class Video
 
 	public void acquireStreamData()
 	{
+		this.acquireStreamData(0);
+	}
+
+	public void acquireStreamData(int pass)
+	{
 		if (this.audioStreams != null)
 		{
 			this.audioStreams.clear();
@@ -189,6 +211,28 @@ public class Video
 						if (mediaType.contains("audio"))
 						{
 							AudioStream audio = new AudioStream(this, streamJson);
+
+							try
+							{
+								int code = Util.getRemoteCode(new URL(audio.getUrl()));
+
+								if (code >= 300)
+								{
+									if (pass >= 3)
+									{
+										YouTubeGo.log().warning(String.format("Pass %s, Error %s for '%s'", pass, code, this.getTitle()));
+										return;
+									}
+									else
+									{
+										this.acquireStreamData(pass++);
+									}
+								}
+							} catch (MalformedURLException e1)
+							{
+								e1.printStackTrace();
+							}
+							
 							this.audioStreams.add(audio);
 						}
 
@@ -210,7 +254,7 @@ public class Video
 			return;
 		}
 
-		System.out.println(String.format("%s total streams found. %s audio streams, %s video streams", this.audioStreams.size() + this.videoStreams.size(), this.audioStreams.size(), this.videoStreams.size()));
+		System.out.println(String.format("%s total streams found. %s audio streams, %s video streams for '%s'", this.audioStreams.size() + this.videoStreams.size(), this.audioStreams.size(), this.videoStreams.size(), this.getTitle()));
 	}
 
 	private String buildStreamRequest()
@@ -221,5 +265,50 @@ public class Video
 	private String buildVideoInfoRequest()
 	{
 		return String.format("http://arisux.com/upload/youtube-downloader/fetchStreamData.php?info=true&id=%s", this.getId());
+	}
+
+	public void setAudioStream(AudioStream audio)
+	{
+		this.audioStream = audio;
+	}
+
+	public void setAudioStream(int idx)
+	{
+		this.audioStream = this.getAudioStreams().get(idx);
+	}
+
+	public AudioStream getProposedAudioStream()
+	{
+		return this.audioStream;
+	}
+	
+	public void setStatusText(String statusText)
+	{
+		this.statusText = statusText;
+	}
+
+	public String getStatus()
+	{
+		return this.statusText;
+	}
+	
+//	public boolean isPreparationThreadComplete()
+//	{
+//		return preparationThreadComplete;
+//	}
+//
+//	public void setVideoPreparationThreadComplete()
+//	{
+//		this.preparationThreadComplete = true;
+//	}
+	
+	public void setErrored(boolean error)
+	{
+		this.hasErrored = error;
+	}
+	
+	public boolean hasErrored()
+	{
+		return this.hasErrored;
 	}
 }
