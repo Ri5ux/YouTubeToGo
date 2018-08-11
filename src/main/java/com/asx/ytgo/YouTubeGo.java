@@ -1,13 +1,11 @@
 package com.asx.ytgo;
 
 import java.io.File;
-import java.net.URL;
 import java.util.Map;
 import java.util.logging.Logger;
 
 import com.asx.ytgo.media.Playlist;
 import com.asx.ytgo.media.Video;
-import com.asx.ytgo.util.Util;
 import com.asx.ytgo.util.streams.AudioStream;
 
 public class YouTubeGo
@@ -19,6 +17,8 @@ public class YouTubeGo
 	private static Logger logger = Logger.getLogger("YTGO");
 	private static File workDirectory = new File("content");
 	private static File audioDirectory = new File(YouTubeGo.getWorkDirectory(), "audio");
+	
+	private static String runtimePlaylistURL;
 	
 	private static UserInterface ui;
 	private static boolean appRunning = true;
@@ -33,6 +33,11 @@ public class YouTubeGo
 	{
 		System.out.println("LWJGL Natives Path: " + LWJGL_NATIVES.getAbsolutePath());
 		System.setProperty("org.lwjgl.librarypath", LWJGL_NATIVES.getAbsolutePath());
+        
+        if (args.length > 0 && args[0] != null)
+        {
+            runtimePlaylistURL = args[0];
+        }
 		
 		if (!getWorkDirectory().exists())
 		{
@@ -56,7 +61,6 @@ public class YouTubeGo
 		appRunning = true;
 		ui = new UserInterface();
 		ui.init();
-
 
 //		URL url = new URL(args[0]);
 //		Map<String, String> queryMap = Util.splitQuery(url);
@@ -126,4 +130,9 @@ public class YouTubeGo
 	{
 		return appRunning;
 	}
+	
+	public static String getRuntimePlaylistURL()
+    {
+        return runtimePlaylistURL;
+    }
 }

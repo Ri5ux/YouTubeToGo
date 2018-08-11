@@ -1,14 +1,10 @@
 package com.asx.ytgo;
 
 import java.awt.Font;
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Map;
 
 import org.asx.glx.gui.GuiPanel;
@@ -31,6 +27,8 @@ public class FormFrontEnd extends GuiForm
 	private Playlist p;
 	private String statusBarText;
 	private boolean downloading;
+	
+	private int statusBarYSize = 50;
 
 	protected Font font;
 	protected Font fontSecondary;
@@ -42,61 +40,68 @@ public class FormFrontEnd extends GuiForm
 	protected GuiTextfield urlTextfield;
 	protected GuiButtonSprite buttonDownload;
 
-	private Color backgroundColor = new Color(0.2F, 0.2F, 0.2F, 0.5F);
-	private Color highlightColor = new Color(0.75F, 0, 0.1F, 1F);
-	private Color normalColor = new Color(1F, 1F, 1F, 0.75F);
-	private Color hoverColor = new Color(1F, 1F, 1F, 1F);
-	private Color titlebarColor = new Color(0.175F, 0.175F, 0.175F, 0.95F);
-	private Color statusBarColor = new Color(0.15F, 0.15F, 0.15F, 0.9F);
-	private Color searchBarColor = new Color(0.5F, 0.5F, 0.5F, 0.25F);
-	private Color buttonColor = new Color(0.5F, 0.5F, 0.5F, 0.25F);
-	private Color buttonHoverColor = new Color(0.75F, 0.75F, 0.75F, 0.25F);
-	private Color videoElementColor = new Color(0.25F, 0.25F, 0.25F, 0.15F);
-	private Color videoElementHoverColor = new Color(0.5F, 0.5F, 0.5F, 0.15F);
-	private static Color erroredHoveringBackgroundColor = new Color(0.75F, 0, 0.1F, 1F);
-	private static Color erroredBackgroundColor = new Color(0.75F, 0, 0.1F, 0.75F);
+	private static Color BACKGROUND_COLOR = new Color(0.2F, 0.2F, 0.2F, 0.5F);
+	private static Color HIGHLIGHT_COLOR = new Color(0.75F, 0, 0.1F, 1F);
+	private static Color NORMAL_COLOR = new Color(1F, 1F, 1F, 0.75F);
+	private static Color HOVER_COLOR = new Color(1F, 1F, 1F, 1F);
+	private static Color TITLEBAR_COLOR = new Color(0.175F, 0.175F, 0.175F, 0.95F);
+	private static Color STATUSBAR_COLOR = new Color(0.15F, 0.15F, 0.15F, 0.9F);
+	private static Color SEARCHBAR_COLOR = new Color(0.5F, 0.5F, 0.5F, 0.25F);
+	private static Color BUTTON_COLOR = new Color(0.5F, 0.5F, 0.5F, 0.25F);
+	private static Color BUTTON_HOVER_COLOR = new Color(0.75F, 0.75F, 0.75F, 0.25F);
+	private static Color VIDEO_ELEMENT_COLOR = new Color(0.25F, 0.25F, 0.25F, 0.15F);
+	private static Color VIDEO_ELEMENT_HOVER_COLOR = new Color(0.5F, 0.5F, 0.5F, 0.15F);
+	private static Color ERROR_HOVER_BACKGROUND_COLOR = new Color(0.75F, 0, 0.1F, 1F);
+	private static Color ERROR_BACKGROUND_COLOR = new Color(0.75F, 0, 0.1F, 0.75F);
 
 	public FormFrontEnd(GuiPanel panel, GuiForm parentForm)
 	{
 		super(panel, parentForm);
+		INSTANCE = this;
 		font = new Font("Segoe UI", Font.BOLD, 20);
 		fontSecondary = new Font("Segoe UI", Font.PLAIN, 14);
 
 		title = new GuiText(this, font, "GO!");
-		title.setColor(normalColor, normalColor);
+		title.setColor(NORMAL_COLOR, NORMAL_COLOR);
 
-		titleDesc = new GuiText(this, font, "[ALPHA]");
-		titleDesc.setColor(highlightColor, highlightColor);
+		titleDesc = new GuiText(this, font, "[ANDY EDITION]");
+		titleDesc.setColor(HIGHLIGHT_COLOR, HIGHLIGHT_COLOR);
 
 		pageStatus = new GuiText(this, fontSecondary, "");
-		pageStatus.setColor(normalColor, normalColor);
+		pageStatus.setColor(NORMAL_COLOR, NORMAL_COLOR);
 
 		statusText = new GuiText(this, font, "No Playlist Loaded");
-		statusText.setColor(normalColor, normalColor);
+		statusText.setColor(NORMAL_COLOR, NORMAL_COLOR);
 
 		buttonDownload = new GuiButtonSprite(this, 0, 0, Sprites.download);
-		buttonDownload.setHoveringBackgroundColor(buttonColor);
+		buttonDownload.setHoveringBackgroundColor(BUTTON_COLOR);
 		buttonDownload.setShouldRender(false);
 		this.add(buttonDownload);
 
 		urlTextfield = new GuiTextfield(this, 0, 0, 500, 30, new GuiText(this, fontSecondary, ""), false);
 		urlTextfield.setPlaceholderText("Playlist URL...");
-		urlTextfield.setColor(searchBarColor, searchBarColor);
+		urlTextfield.setColor(SEARCHBAR_COLOR, SEARCHBAR_COLOR);
 		urlTextfield.setShouldRender(false);
+		urlTextfield.setText(YouTubeGo.getRuntimePlaylistURL() != null && !YouTubeGo.getRuntimePlaylistURL().isEmpty() ? YouTubeGo.getRuntimePlaylistURL() : "");
 		this.add(urlTextfield);
+		
+		if (!this.urlTextfield.getText().isEmpty() && !this.urlTextfield.getText().equals(this.urlTextfield.getPlaceholderText()))
+		{
+		    this.load();
+		}
 	}
 
 	@Override
 	public void render()
 	{
-		GuiElement.renderColoredRect(0, 0, Display.getWidth(), Display.getHeight(), backgroundColor);
+		GuiElement.renderColoredRect(0, 0, Display.getWidth(), Display.getHeight(), BACKGROUND_COLOR);
 		super.render();
-		GuiElement.renderColoredRect(0, 0, Display.getWidth(), 50, titlebarColor);
+		GuiElement.renderColoredRect(0, 0, Display.getWidth(), statusBarYSize, TITLEBAR_COLOR);
 		title.render(100, 10);
 		titleDesc.render(title.getX() + title.getWidth() + 10, 10);
 		Sprites.logoWide.draw(15, 8, 0.08F);
 
-		GuiElement.renderColoredRect(0, Display.getHeight() - 50, Display.getWidth(), 50, statusBarColor);
+		GuiElement.renderColoredRect(0, Display.getHeight() - 50, Display.getWidth(), 50, STATUSBAR_COLOR);
 
 		pageStatus.setText(this.p == null ? "No playlists are currently loaded, paste the URL of one in the bar above to get started!" : "");
 		pageStatus.render(Display.getWidth() / 2 - pageStatus.getWidth() / 2, Display.getHeight() / 2);
@@ -113,7 +118,7 @@ public class FormFrontEnd extends GuiForm
 		urlTextfield.setPosition(titleDesc.getX() + titleDesc.getWidth() + 10, 10);
 		urlTextfield.setWidth(Display.getWidth() - (10 * 2) - titleDesc.getX() - titleDesc.getWidth() - buttonDownload.getWidth());
 		urlTextfield.render();
-
+		
 		if (YouTubeGo.gui().getTicks() % 20 == 0)
 		{
 			if (p == null)
@@ -135,45 +140,17 @@ public class FormFrontEnd extends GuiForm
 
 					this.setStatusBarText(String.format("%s / %s Videos Downloaded", count, this.p.videos().size()));
 				}
-
-//				if (this.p != null && this.p.videos() != null && p.videos().size() > 0)
-//				{
-//					int count = 0;
-//					
-//					for (Video v : this.p.videos())
-//					{
-//						if (v.isPreparationThreadComplete())
-//						{
-//							count++;
-//						}
-//					}
-//					
-//					if (count == p.videos().size())
-//					{
-//						this.enableDownloadButton();
-//					}
-//				}
 			}
 		}
 	}
+	
+	private static FormFrontEnd INSTANCE;
 
 	public static FormFrontEnd instance()
 	{
-		if (YouTubeGo.gui().getPanel() instanceof GuiMain)
-		{
-			GuiMain main = (GuiMain) YouTubeGo.gui().getPanel();
-
-			if (main.getForm() instanceof FormFrontEnd)
-			{
-				FormFrontEnd frontEnd = (FormFrontEnd) main.getForm();
-
-				return frontEnd;
-			}
-		}
-
-		return null;
+		return INSTANCE;
 	}
-
+	
 	public Playlist getPlaylist()
 	{
 		return p;
@@ -192,6 +169,15 @@ public class FormFrontEnd extends GuiForm
 	@Override
 	public void onScroll(int dwheel)
 	{
+        GuiVideoElement lastVideoElement = this.getVideoElementFor(this.getPlaylist().videos().get(this.getPlaylist().videos().size() - 1));
+        
+        int height = Display.getHeight();
+        
+        if (lastVideoElement.getY() + lastVideoElement.getHeight() < height - this.statusBarYSize && dwheel < 0)
+        {
+            return;
+        }
+        
 		super.onScroll(dwheel);
 	}
 
@@ -204,38 +190,13 @@ public class FormFrontEnd extends GuiForm
 	@Override
 	public void onKey(int key, char character)
 	{
-		String charUnicodeValue = "\\u" + Integer.toHexString(character | 0x10000).substring(1);
-
-		if (charUnicodeValue.equalsIgnoreCase("\\u0016"))
-		{
-			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-			try
-			{
-				Object clipboardData = clipboard.getData(DataFlavor.stringFlavor);
-
-				if (clipboardData instanceof String)
-				{
-					String clipboardText = (String) clipboardData;
-
-					for (char c : clipboardText.toCharArray())
-					{
-						urlTextfield.onKey(key, c, true);
-					}
-				}
-			} catch (UnsupportedFlavorException e)
-			{
-				e.printStackTrace();
-			} catch (IOException e)
-			{
-				e.printStackTrace();
-			}
-		}
+		super.onKey(key, character);
 
 		if (key == Keyboard.KEY_RETURN)
 		{
 			if (GuiTextfield.activeTextfield == this.urlTextfield)
 			{
-				this.loadPlaylist();
+				this.load();
 			}
 
 			if (this.onScreen)
@@ -256,15 +217,16 @@ public class FormFrontEnd extends GuiForm
 			{
 				if (e instanceof GuiVideoElement)
 				{
+				    GuiVideoElement ve = (GuiVideoElement) e;
+				    ve.prepareForRemoval();
 					this.remove(e);
 				}
 			}
 		}
 	}
 
-	private void loadPlaylist()
+	private void load()
 	{
-		FormFrontEnd.instance().statusText.setText("Loading playlist...");
 		this.deleteExistingVideoElements();
 
 		String uri = urlTextfield.getText();
@@ -277,15 +239,23 @@ public class FormFrontEnd extends GuiForm
 			{
 				Map<String, String> queryMap = Util.splitQuery(url);
 
-				String id = queryMap.get("list");
+				String playlistId = queryMap.get("list");
 
-				if (id != null && !id.isEmpty())
+				if (playlistId != null && !playlistId.isEmpty())
 				{
-					p = new Playlist(queryMap.get("list"));
-					p.downloadPlaylistData();
+				    this.loadPlaylist(queryMap);
 				} else
 				{
-					YouTubeGo.log().warning("URL is not a YouTube playlist: " + uri);
+	                String videoId = queryMap.get("v");
+	                
+				    if (videoId != null && !videoId.isEmpty())
+				    {
+				        this.loadVideo(queryMap);
+				    }
+				    else
+				    {
+				        YouTubeGo.log().warning("URL is not a YouTube playlist or video: " + uri);
+				    }
 				}
 			}
 		} catch (MalformedURLException e)
@@ -298,6 +268,50 @@ public class FormFrontEnd extends GuiForm
 		}
 
 	}
+    
+    private void loadPlaylist(Map<String, String> queryMap)
+    {
+        statusText.setText("Loading playlist...");
+        p = new Playlist(queryMap.get("list"));
+        p.downloadPlaylistData();
+    }
+    
+    private void loadVideo(Map<String, String> queryMap)
+    {
+        statusText.setText("Loading video...");
+        p = new Playlist(null);
+        p.downloadVideoData(queryMap.get("v"));
+    }
+    
+    public ArrayList<GuiVideoElement> getVideoElements()
+    {
+        ArrayList<GuiVideoElement> videoElements = new ArrayList<GuiVideoElement>();
+        
+        for (GuiElement element : this.getElements())
+        {
+            if (element instanceof GuiVideoElement)
+            {
+                videoElements.add((GuiVideoElement) element);
+            }
+        }
+        
+        return videoElements;
+    }
+    
+    public GuiVideoElement getVideoElementFor(Video v)
+    {
+        ArrayList<GuiVideoElement> videoElements = this.getVideoElements();
+        
+        for (GuiVideoElement ve : videoElements)
+        {
+            if (ve.getVideo().getId().equalsIgnoreCase(v.getId()))
+            {
+                return ve;
+            }
+        }
+        
+        return null;
+    }
 
 	public static class GuiVideoElement extends GuiText
 	{
@@ -305,6 +319,7 @@ public class FormFrontEnd extends GuiForm
 		private Video video;
 		private GuiText title;
 		private GuiText status;
+		private GuiButtonSprite downloadButton;
 
 		public GuiVideoElement(GuiForm form, Font font, Playlist playlist, Video video)
 		{
@@ -313,26 +328,61 @@ public class FormFrontEnd extends GuiForm
 			this.video = video;
 			this.title = new GuiText(form, font, playlist.videos().indexOf(video) + " - " + video.getTitle());
 			this.status = new GuiText(form, font, "");
+			this.downloadButton = new GuiButtonSprite(form, 0, 0, Sprites.downloadSmall);
+            this.downloadButton.setWidth(23);
+            this.downloadButton.setHeight(23);
+			this.downloadButton.setHoveringBackgroundColor(VIDEO_ELEMENT_HOVER_COLOR);
+			this.downloadButton.setClickAction(new IAction<GuiElement>() {
+                @Override
+                public void run(GuiElement o)
+                {
+                    System.out.println("Individually downloading " + video.getTitle());
+                    video.setErrored(false);
+                    playlist.runDownloadThread(video, true, true);
+                }
+            });
+			this.form.add(this.downloadButton);
 		}
 
-		@Override
+		public void prepareForRemoval()
+        {
+		    this.form.remove(this.downloadButton);
+        }
+
+        @Override
 		public void render()
 		{
-			this.setWidth(Display.getWidth());
-			this.setHeight(23);
+            boolean large = Display.getHeight() >= 768;
+            int dpi = large ? 4 : 1;
+            this.setY(55 + playlist.videos().indexOf(video) * (24 * dpi));
+            this.setWidth(Display.getWidth());
+            this.height = 23 * dpi;
+
 			this.setLeftPadding(10);
 			this.setRightPadding(10);
+            
+            if (this.video.getThumbnailImage() != null)
+            {
+                int h = this.height;
+                this.video.getThumbnailImage().draw(this.x, this.getY(), h * 16 / 9, h);
+            }
 
 			if (this.video.hasErrored())
 			{
-				GuiElement.renderColoredRect(this.x, this.getY(), this.width, this.height, this.isMouseHovering() ? erroredHoveringBackgroundColor : erroredBackgroundColor);
+				GuiElement.renderColoredRect(this.x, this.getY(), this.width, this.height, this.isMouseHovering() ? ERROR_HOVER_BACKGROUND_COLOR : ERROR_BACKGROUND_COLOR);
 			} else
 			{
 				GuiElement.renderColoredRect(this.x, this.getY(), this.width, this.height, this.isMouseHovering() ? this.hoveringBackgroundColor : this.backgroundColor);
 			}
+			
+			title.setColor(NORMAL_COLOR, NORMAL_COLOR);
 			title.render(this.x + leftPadding, this.getY());
 			status.setText(this.getVideo().getStatus());
-			status.render(Display.getWidth() - status.getWidth() - rightPadding, this.getY());
+			status.render(Display.getWidth() - status.getWidth() - rightPadding - this.downloadButton.getWidth(), this.getY());
+			
+            this.downloadButton.setX(Display.getWidth() - this.downloadButton.getWidth());
+			this.downloadButton.setY(this.getY());
+			this.downloadButton.render();
 		}
 
 		@Override
@@ -355,6 +405,11 @@ public class FormFrontEnd extends GuiForm
 		{
 			return status;
 		}
+		
+		public GuiButtonSprite getDownloadButton()
+        {
+            return downloadButton;
+        }
 	}
 
 	public void updatePlaylistData()
@@ -362,10 +417,11 @@ public class FormFrontEnd extends GuiForm
 		for (Video v : p.videos())
 		{
 			GuiVideoElement video = new GuiVideoElement(this, fontSecondary, p, v);
-			video.setBackgroundColor(videoElementColor);
+			
+			video.setBackgroundColor(VIDEO_ELEMENT_COLOR);
 			video.setPosition(0, 55 + p.videos().indexOf(v) * 24);
-			video.setColor(normalColor, hoverColor);
-			video.setHoveringBackgroundColor(videoElementHoverColor);
+			video.setColor(NORMAL_COLOR, HOVER_COLOR);
+			video.setHoveringBackgroundColor(VIDEO_ELEMENT_HOVER_COLOR);
 			video.setShouldRender(true);
 			this.add(video);
 			this.setStatusBarText(String.format("Playlist loaded. Found %s video(s)", p.videos().size()));
