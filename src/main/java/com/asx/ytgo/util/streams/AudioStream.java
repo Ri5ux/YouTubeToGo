@@ -47,7 +47,7 @@ public class AudioStream extends Stream
 	@Override
 	public String getFileExtension()
 	{
-		return this.getType().substring(this.getType().indexOf("/") + 1, this.getType().indexOf(";"));
+		return this.extension;
 	}
 
 	@Override

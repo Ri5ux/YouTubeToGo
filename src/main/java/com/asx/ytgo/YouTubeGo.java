@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import org.asx.glx.opengl.ResourceLocation;
+
 import com.asx.ytgo.media.Playlist;
 import com.asx.ytgo.media.Video;
 import com.asx.ytgo.util.streams.AudioStream;
@@ -12,7 +14,7 @@ public class YouTubeGo
 {
 	public static final boolean DEBUG = false;
 	private static final File LWJGL_NATIVES = new File("lib/natives");
-	public static final File RESOURCES = new File("resources");
+    public static final ResourceLocation RESOURCES = new ResourceLocation("sprites");
 
 	private static Logger logger = Logger.getLogger("YTGO");
 	private static File workDirectory = new File("content");

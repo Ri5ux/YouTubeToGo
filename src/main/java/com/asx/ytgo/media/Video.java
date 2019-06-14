@@ -7,7 +7,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
-import org.asx.glx.opengl.ResourceLocation;
 import org.asx.glx.opengl.Sprite;
 
 import com.asx.ytgo.YouTubeGo;
@@ -16,6 +15,7 @@ import com.asx.ytgo.util.Util;
 import com.asx.ytgo.util.streams.AudioStream;
 import com.asx.ytgo.util.streams.Stream;
 import com.asx.ytgo.util.streams.VideoStream;
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -25,6 +25,7 @@ public class Video
     private String                 title;
     private String                 videoLength;
     private JsonObject             videoArguments;
+    private JsonObject             videoDetails;
     private float                  percentDownloaded;
     private String                 statusText;
 
@@ -128,6 +129,11 @@ public class Video
         return videoArguments;
     }
 
+    public JsonObject getVideoDetails()
+    {
+        return videoDetails;
+    }
+
     public ArrayList<AudioStream> getAudioStreams()
     {
         return audioStreams;
@@ -166,12 +172,12 @@ public class Video
 
         return "jpg";
     }
-    
+
     public URL getThumbnailMaxUrl() throws MalformedURLException
     {
         return new URL(String.format("https://i.ytimg.com/vi/%s/maxresdefault.jpg", this.id));
     }
-    
+
     public URL getThumbnailHQUrl() throws MalformedURLException
     {
         return new URL(String.format("https://i.ytimg.com/vi/%s/hqdefault.jpg", this.id));
@@ -200,12 +206,7 @@ public class Video
     {
         if (this.thumbnailImage == null && this.getThumbnailFile() != null && this.getThumbnailFile().exists())
         {
-            ResourceLocation res = new ResourceLocation(this.getThumbnailFile());
-
-            if (res != null && res.getLocation() != null)
-            {
-                this.thumbnailImage = Sprite.load(res);
-            }
+            this.thumbnailImage = Sprite.load(this.getThumbnailFile());
         }
 
         return thumbnailImage;
@@ -227,8 +228,12 @@ public class Video
                 {
                     JsonObject streamJson = (JsonObject) json;
                     this.videoArguments = streamJson.get("args").getAsJsonObject();
+                    String playerResponse = this.videoArguments.get("player_response").getAsString();
+                    this.videoDetails = new Gson().fromJson(playerResponse, JsonObject.class).get("videoDetails").getAsJsonObject();
                     this.title = this.videoArguments.get("title").toString().replaceAll("\"", "");
                     this.videoLength = this.videoArguments.get("length_seconds").toString();
+
+                    System.out.println("Video Details: " + this.videoDetails);
                 }
             }
             else
@@ -278,7 +283,9 @@ public class Video
                     if (e instanceof JsonObject)
                     {
                         JsonObject streamJson = (JsonObject) e;
-                        String mediaType = streamJson.get("type").toString();
+                        System.out.println(streamJson);
+                        JsonElement format = streamJson.get("format");
+                        String mediaType = format.toString();
 
                         if (mediaType.contains("audio"))
                         {
@@ -334,7 +341,7 @@ public class Video
 
     private String buildStreamRequest()
     {
-        return String.format("http://arisux.com/upload/youtube-downloader/fetchStreamData.php?id=%s", this.getId());
+        return String.format("http://arisux.com/upload/ytdl/download.php?link=https://www.youtube.com/watch?v=%s", this.getId());
     }
 
     private String buildVideoInfoRequest()

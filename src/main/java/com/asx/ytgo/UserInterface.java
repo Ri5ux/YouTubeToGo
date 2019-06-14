@@ -3,7 +3,6 @@ package com.asx.ytgo;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -77,9 +76,9 @@ public class UserInterface
 			Display.setDisplayMode(new DisplayMode(854, 480));
 
 			ByteBuffer[] list = new ByteBuffer[2];
-			list[0] = Sprite.toByteBuffer(ImageIO.read(new File(YouTubeGo.RESOURCES, "16.png")));
-			list[1] = Sprite.toByteBuffer(ImageIO.read(new File(YouTubeGo.RESOURCES, "32.png")));
-			Display.setIcon(list);
+            list[0] = Sprite.toByteBuffer(ImageIO.read(YouTubeGo.class.getClassLoader().getResourceAsStream(YouTubeGo.RESOURCES.getLocation().getPath() + "/16.png")));
+            list[1] = Sprite.toByteBuffer(ImageIO.read(YouTubeGo.class.getClassLoader().getResourceAsStream(YouTubeGo.RESOURCES.getLocation().getPath() + "/32.png")));
+            Display.setIcon(list);
 			
 			Display.create();
 			Display.setVSyncEnabled(true);

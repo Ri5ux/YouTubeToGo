@@ -64,7 +64,7 @@ public class FormFrontEnd extends GuiForm
 		title = new GuiText(this, font, "GO!");
 		title.setColor(NORMAL_COLOR, NORMAL_COLOR);
 
-		titleDesc = new GuiText(this, font, "[ANDY EDITION]");
+		titleDesc = new GuiText(this, font, "[ALPHA]");
 		titleDesc.setColor(HIGHLIGHT_COLOR, HIGHLIGHT_COLOR);
 
 		pageStatus = new GuiText(this, fontSecondary, "");

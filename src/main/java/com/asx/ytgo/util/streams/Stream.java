@@ -13,19 +13,25 @@ public class Stream
 	protected String url;
 	protected long bitrate;
 	protected String type;
+	protected String extension;
+	protected int filesize;
 
 	public Stream(Video v, JsonObject o)
 	{
 		this.v = v;
 		this.url = o.get("url").getAsString();
-		this.bitrate = o.get("bitrate").getAsLong();
-		this.type = o.get("type").getAsString();
+		this.bitrate = o.get("abr").getAsLong();
+		this.type = o.get("format").getAsString();
+        this.extension = o.get("ext").getAsString();
+        this.filesize = o.get("filesize").getAsInt();
 
 		if (YouTubeGo.DEBUG)
 		{
 			System.out.println(String.format("URL: %s", this.url));
 			System.out.println(String.format("Bitrate: %s", this.bitrate));
-			System.out.println(String.format("Type: %s", this.type));
+            System.out.println(String.format("Type: %s", this.type));
+            System.out.println(String.format("Extension: %s", this.extension));
+            System.out.println(String.format("Filesize: %s", this.extension));
 		}
 	}
 
@@ -77,8 +83,13 @@ public class Stream
 
 	public String getFileExtension()
 	{
-		return this.getType().split("/")[1];
+		return extension;
 	}
+	
+	public int getFilesize()
+    {
+        return filesize;
+    }
 
 	public File getFile()
 	{

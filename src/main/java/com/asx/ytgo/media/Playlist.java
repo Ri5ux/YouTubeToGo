@@ -119,7 +119,7 @@ public class Playlist
     private void processVideo(String videoId, String title)
     {
         Video v = new Video(videoId);
-        
+
         if (title != null)
         {
             v.setTitle(title);
@@ -313,41 +313,53 @@ public class Playlist
         for (int i = 0; i < v.getAudioStreams().size(); i++)
         {
             AudioStream audio = v.getAudioStreams().get(i);
-
-            if (audio.download())
+            
+            if (audio.getFileExtension().equalsIgnoreCase("m4a"))
             {
-                v.setAudioStream(audio);
-                System.out.println(String.format("Download of '%s' completed.", v.getTitle()));
-                v.setStatusText("[Downloaded]");
-                v.setDownloaded();
-                break;
-            }
-
-            boolean fileSizeMatch = false;
-
-            try
-            {
-                fileSizeMatch = Util.fileSizeMatches(audio.getFile(), new URL(audio.getUrl()));
-            }
-            catch (MalformedURLException e)
-            {
-                YouTubeGo.log().warning("Unable to verify filesize against remote source: URL Malformed");
-                e.printStackTrace();
-            }
-
-            if (audio.getFile().exists() && !Util.isFileEmpty(audio.getFile()) && fileSizeMatch)
-            {
-                break;
-            }
-
-            if (YouTubeGo.DEBUG)
-                System.out.println(String.format("Stream with index %s is broken, trying next stream.", i));
-
-            if ((i + 1) >= v.getAudioStreams().size())
-            {
-                this.doVideoDownload(v, pass++);
+                downloadStream(v, audio, 0);
             }
         }
+    }
+
+    private boolean downloadStream(Video v, AudioStream audio, int pass)
+    {
+        if (audio.download())
+        {
+            v.setAudioStream(audio);
+            System.out.println(String.format("Download of '%s' completed.", v.getTitle()));
+            v.setStatusText("[Downloaded]");
+            v.setDownloaded();
+            return true;
+        }
+
+        boolean fileSizeMatch = false;
+
+        try
+        {
+            fileSizeMatch = Util.fileSizeMatches(audio.getFile(), new URL(audio.getUrl()));
+        }
+        catch (MalformedURLException e)
+        {
+            YouTubeGo.log().warning("Unable to verify filesize against remote source: URL Malformed");
+            e.printStackTrace();
+        }
+
+        if (audio.getFile().exists() && !Util.isFileEmpty(audio.getFile()) && fileSizeMatch)
+        {
+            return true;
+        }
+        
+        if (pass > 3)
+        {
+            System.out.println(String.format("Audio stream is broken, unable to download."));
+            return false;
+        }
+
+        pass++;
+        
+        System.out.println(String.format("Audio stream download error. Retrying, Pass %s...", pass));
+        
+        return downloadStream(v, audio, pass);
     }
 
     public String buildPlaylistRequest()

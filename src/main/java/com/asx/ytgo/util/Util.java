@@ -196,22 +196,22 @@ public class Util
 		float dataRead = 0;
 		BufferedInputStream in = new BufferedInputStream(connection.getInputStream());
 		FileOutputStream fos = new FileOutputStream(saveLocation);
-		BufferedOutputStream bout = new BufferedOutputStream(fos, 2048);
-		byte[] data = new byte[2048];
+		BufferedOutputStream bout = new BufferedOutputStream(fos, 8192);
+		byte[] data = new byte[8192];
 		int i = 0;
 		int c = 0;
 
 		if (YouTubeGo.DEBUG)
 		System.out.println(String.format("File Size: %s MB", Math.round(((double) filesize / 1024D / 1024D) * 100D) / 100D));
 
-		while ((i = in.read(data, 0, 2048)) >= 0)
+		while ((i = in.read(data, 0, 8192)) >= 0)
 		{
 			c++;
 			dataRead = dataRead + i;
 			bout.write(data, 0, i);
 			float progress = (dataRead * 100) / filesize;
 
-			if (YouTubeGo.DEBUG)
+			//if (YouTubeGo.DEBUG)
 			{
 				if (c % 100 == 0)
 				{
